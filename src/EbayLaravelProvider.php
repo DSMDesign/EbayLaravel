@@ -58,5 +58,9 @@ class EbayLaravelProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../Publish/Config/' => config_path(''),
         ]);
+        // Publish the view to the view folder with the login view and demo
+        $this->publishes([
+            __DIR__ . '/../Publish/Views/' => resource_path('ebay/'),
+        ]);
     }
 }

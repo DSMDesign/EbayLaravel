@@ -5,36 +5,50 @@ namespace Mariojgt\EbayLaravel\Controllers;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
+use Storage;
+use File;
 
+/**
+ * This Controller will manage the ebay integration for us in order to use you need to create a new app in ebay and get the keys
+ * @author Mario jose goes tarosso <
+ * This api is organiae in the order you need to use it
+ * [Description EbayController]
+ */
 class EbayController extends Controller
 {
     public $bearerToken;
     public $endPoint;
+    private $tokenTxtFile = 'ebay_token.txt';
 
-    public function __construct()
+    /**
+     * ///#1 This fuction will redirect the user to ebay and once is autenticate it will return back to this page with the token
+     * This fuction will create a urel that we have to redirect the user to and on return we will get the token
+     * @return [type]
+     */
+    public function firstAplicationUse()
     {
-        // Request the bearer token using the eBay API client and secret
-        $this->bearerToken = $this->generateAcessTokenClient();
-    }
-
-    public function firstAuthAppToken()
-    {
+        // Note that is a diferencet endpoint in here
         if (config('ebayLaravel.ebay_is_live')) {
             $firstEndpoint = 'https://auth.ebay.com/';
         } else {
             $firstEndpoint = 'https://auth.sandbox.ebay.com/';
         }
-
-        $url = $firstEndpoint . "oauth2/authorize?client_id=" . config('ebayLaravel.ebay_client_id') . "&response_type=code&redirect_uri=" . config('ebayLaravel.ebay_first_login_url') . "&scope=" . config('ebayLaravel.ebay_api_scopes');
+        // Build the login url
+        $url = $firstEndpoint . "/oauth2/authorize?client_id=" . config('ebayLaravel.ebay_client_id') . "&redirect_uri=" . config('ebayLaravel.ebay_runame') . "&response_type=code&scope=" . config('ebayLaravel.ebay_api_scopes') . "&prompt=login";
         return $url;
     }
 
     /**
-     * /#1 Get the bearer token from the eBay using API client and secret
+     * ///#2 - Base on the code of return we goin to get the token
+     * This fuction will get the user token back from the login screen and we will autenticate with ebay and return the full token
      * @return [type]
      */
-    public function generateAcessTokenClient()
+    public function generateFullAcessToken($code)
     {
+        // If the file exists we will just return the file data
+        if ($this->readEbayToken()['status']) {
+            return $this->readEbayToken()['data'];
+        }
         // Check if is in live or sandbox mode
         if (config('ebayLaravel.ebay_is_live')) {
             $this->endPoint = 'https://api.ebay.com/';
@@ -48,71 +62,182 @@ class EbayController extends Controller
             ->post(
                 $this->endPoint . 'identity/v1/oauth2/token',
                 [
-                    'grant_type' => 'client_credentials',
-                    // 'scope'      => config('ebayLaravel.ebay_api_scopes'),
+                    'grant_type'   => 'authorization_code',
+                    'code'         => $code,
+                    'redirect_uri' => config('ebayLaravel.ebay_runame'),
                 ]
             );
 
+        // If there is an error we will return the error
+        if (!empty($response->json()['error'])) {
+            throw new \Exception($response->json()['error_description'] . ' Try Login again, or contact the developers');
+        } else {
+            // Now we will save the token in the in the storate as a text file
+            $txtFileData = json_encode($response->json());
+            $fileName    = 'ebay_token.txt';
+            Storage::put($fileName, $txtFileData);
+
+            return $response->json();
+        }
+    }
+
+    /**
+     * ///#2 - This function will read the token from the file and return it bue we goin to use this in other requests
+     * //* This Fuction will get the token from the storage file and return it the data
+     * @return [type]
+     */
+    public function readEbayToken()
+    {
+        // Just for reference
+        //File::get(storage_path('app/' . $this->tokenTxtFile))
+        $result = File::exists(storage_path('app/' . $this->tokenTxtFile));
+        if ($result) {
+            return [
+                'status' => true,
+                'data'   => json_decode(Storage::get($this->tokenTxtFile)),
+            ];
+        } else {
+            return [
+                'status' => false
+            ];
+        }
+    }
+
+    /**
+     * /#1 Get the bearer token from the eBay using API client and secret
+     * @return [type]
+     */
+    public function getRefreshToken()
+    {
+        $userRefreshToken = $this->readEbayToken()['data']->refresh_token;
+        // Check if is in live or sandbox mode
+        if (config('ebayLaravel.ebay_is_live')) {
+            $this->endPoint = 'https://api.ebay.com/';
+        } else {
+            $this->endPoint = 'https://api.sandbox.ebay.com/';
+        }
+
+        // Sending the request to xero with the normal authorization and form data
+        $response = Http::withBasicAuth(config('ebayLaravel.ebay_client_id'), config('ebayLaravel.ebay_secret_id'))
+            ->asForm()
+            ->post(
+                $this->endPoint . 'identity/v1/oauth2/token',
+                [
+                    'grant_type'    => 'refresh_token',
+                    'refresh_token' => $userRefreshToken,
+                    'scope'         => config('ebayLaravel.ebay_api_scopes'),
+                ]
+            );
+
+        // Return the refresh token so we can use in other request
         if ($response->status() == 200) {
+            // Set the acesstoken in the header so we can use it in the next requests
+            $this->bearerToken = $response->json()['access_token'];
             return $response->json();
         } else {
             throw new \Exception('Ebay CLient or Secret is not valid please generate one following on this link https://developer.ebay.com/my/keys');
         }
     }
 
-    public function addItemForSale($productSKu)
+    public function ContentLanguage()
     {
-        $productData = [
-            'product' => [
-                'title' => 'Test listing - do not bid or buy - awesome Apple watch test 2',
-                'aspects' => [
-                    'brands' => [
-                        'Apple',
-                    ],
-                    'color' => [
-                        'Black',
-                    ],
-                    'material' => [
-                        'Plastic',
-                    ],
-                ],
-                'description' => 'My product description',
-                'upc' => ['888462079525'],
-                'imageUrls' => [
-                    "http://store.storeimages.cdn-apple.com/4973/as-images.apple.com/is/image/AppleInc/aos/published/images/S/1/S1/42/S1-42-alu-silver-sport-white-grid?wid=332&hei=392&fmt=jpeg&qlt=95&op_sharpen=0&resMode=bicub&op_usm=0.5,0.5,0,0&iccEmbed=0&layer=comp&.v=1472247758975",
-                    "http://store.storeimages.cdn-apple.com/4973/as-images.apple.com/is/image/AppleInc/aos/published/images/4/2/42/stainless/42-stainless-sport-white-grid?wid=332&hei=392&fmt=jpeg&qlt=95&op_sharpen=0&resMode=bicub&op_usm=0.5,0.5,0,0&iccEmbed=0&layer=comp&.v=1472247760390",
-                    "http://store.storeimages.cdn-apple.com/4973/as-images.apple.com/is/image/AppleInc/aos/published/images/4/2/42/ceramic/42-ceramic-sport-cloud-grid?wid=332&hei=392&fmt=jpeg&qlt=95&op_sharpen=0&resMode=bicub&op_usm=0.5,0.5,0,0&iccEmbed=0&layer=comp&.v=1472247758007"
-                ]
-            ],
-            'condition' => 'NEW',
-            'packageWeightAndSize' => [
-                'dimensions' => [
-                    'height' => 5,
-                    'length' => 10,
-                    'width' => 15,
-                    'unit' => 'INCH'
-                ],
-                'packageType' => 'MAILING_BOX',
-                'weight' => [
-                    'value' => 2,
-                    'unit' => 'POUND'
-                ]
-            ],
-            'availability' => [
-                'shipToLocationAvailability' => [
-                    'quantity' => 10
-                ]
-            ]
-        ];
+    }
 
+    // This function will create the or replace the inventory item in ebay ,basicly we will create or update a product
+    public function createInventoryItem($productSKu, $productData)
+    {
         // Sedn the request to the xero controller with aplication/json and send the invoice array
         $responseProductCreation = Http::acceptJson()
             ->withHeaders([
-                'Content-Language' => 'en-US',
+                'Content-Language' => 'en-' . config('ebayLaravel.content_language'),
             ])
             ->withToken($this->bearerToken) // This is the token comes from the xero controller
             ->withBody(json_encode($productData), 'application/json')
             ->put($this->endPoint . 'sell/inventory/v1/inventory_item/' . $productSKu); // End point
-        dd($responseProductCreation->json());
+        // Get the response code
+        $responseCode = $responseProductCreation->status();
+
+        return $responseProductCreation->json();
+    }
+
+    /**
+     * Create a inventory location so we can Offer products
+     * @param mixed $inventoryItemLocation
+     *
+     * @return [type]
+     */
+    public function createInventoryLocation($location, $inventoryItemLocation)
+    {
+        // Sedn the request to the xero controller with aplication/json and send the invoice array
+        $responseProductCreation = Http::acceptJson()
+            ->withHeaders([
+                'Content-Language' => 'en-' . config('ebayLaravel.content_language'),
+            ])
+            ->withToken($this->bearerToken) // This is the token comes from the xero controller
+            ->withBody($inventoryItemLocation, 'application/json')
+            ->post($this->endPoint . 'sell/inventory/v1/location/' . $location); // End point
+
+        return $responseProductCreation;
+    }
+
+    /**
+     * Get the inventory item from ebay
+     * @param mixed $productSKu
+     * @param mixed $productData
+     *
+     * @return [type]
+     */
+    public function getInventoryItemId($productSKu)
+    {
+        // Sedn the request to the xero controller with aplication/json and send the invoice array
+        $responseProductCreation = Http::acceptJson()
+            ->withHeaders([
+                'Content-Language' => 'en-'.config('ebayLaravel.content_language'),
+            ])
+            ->withToken($this->bearerToken) // This is the token comes from the xero controller
+            ->get($this->endPoint . 'sell/inventory/v1/inventory_item/' . $productSKu); // End point
+        // Get the response code
+        $responseCode = $responseProductCreation->status();
+
+        return $responseProductCreation->json();
+    }
+
+    /**
+     * Create a offer on ebay for the product
+     * @param mixed $offerItem
+     *
+     * @return [type]
+     */
+    public function createOffer($offerItem)
+    {
+        // Sedn the request to the xero controller with aplication/json and send the invoice array
+        $responseProductCreation = Http::acceptJson()
+            ->withHeaders([
+                'Content-Language' => 'en-' . config('ebayLaravel.content_language'),
+            ])
+            ->withToken($this->bearerToken) // This is the token comes from the xero controller
+            ->withBody($offerItem, 'application/json')
+            ->post($this->endPoint . 'sell/inventory/v1/offer'); // End point
+
+        return $responseProductCreation;
+    }
+
+    /**
+     * Publish the offer on ebay
+     * @param mixed $offerItem
+     *
+     * @return [type]
+     */
+    public function publishOffer($offerId)
+    {
+        // Sedn the request to the xero controller with aplication/json and send the invoice array
+        $response = Http::acceptJson()
+            ->withHeaders([
+                'Content-Language' => 'en-' . config('ebayLaravel.content_language'),
+            ])
+            ->withToken($this->bearerToken) // This is the token comes from the xero controller
+            ->post($this->endPoint . 'sell/inventory/v1/offer/' . $offerId . '/publish'); // End point
+
+        return $response;
     }
 }
