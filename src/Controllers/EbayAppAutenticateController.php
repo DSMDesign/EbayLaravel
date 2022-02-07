@@ -20,9 +20,9 @@ class EbayAppAutenticateController extends Controller
         $ebayManager   = new EbayController();
         // Check if the user has autorized the appliacation
         $isAutenticate = $ebayManager->applicationAuthenticated();
-
         if ($isAutenticate == true) {
-            dd('Application is autenticated, please contact support in case of problems');
+            // If the user has autorized the appliacation we will redirect to the 404 page
+            return abort(404);
         } else {
             // Regenrate the url we goin to use to redirect the user
             $firstAuthLoginUrl = $ebayManager->firstAplicationUse();
@@ -37,14 +37,21 @@ class EbayAppAutenticateController extends Controller
      */
     public function autenticateToken(Request $request)
     {
-        // Get the token from the request
-        $code           = Request('code');
         // Start the ebay helper class
         $ebayManager    = new EbayController();
-        // Get the request code and call ebay to autenticate the code and generate a token
-        $firstAuthLogin = $ebayManager->generateFullAcessToken($code);
-        // Once this token is generate we can use to call ebay api request
-        // Return a view
-        return view('ebay.ebay_autenticated');
+        // Check if the user has autorized the appliacation
+        $isAutenticate = $ebayManager->applicationAuthenticated();
+        if ($isAutenticate == true) {
+            // If the user has autorized the appliacation we will redirect to the 404 page
+            return abort(404);
+        } else {
+            // Get the token from the request
+            $code           = Request('code');
+            // Get the request code and call ebay to autenticate the code and generate a token
+            $ebayManager->generateFullAcessToken($code);
+            // Once this token is generate we can use to call ebay api request
+            // Return a view
+            return view('ebay.ebay_autenticated');
+        }
     }
 }
