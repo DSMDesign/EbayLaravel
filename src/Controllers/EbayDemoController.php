@@ -10,14 +10,11 @@ use Illuminate\Http\Request;
 class EbayDemoController extends Controller
 {
     /**
-     * This FUction will be use to demontrage how to create new products using the api on ebay
+     * This fuction will be use to demontrage how to create new products using the api on ebay
      * @return [type]
      */
     public function index()
     {
-        //$ebayManager       = new EbayController();
-        //$firstAuthLoginUrl = $ebayManager->firstAplicationUse();
-
         // Return a view
         return view('ebay.ebay_demo_create_product');
     }
@@ -40,8 +37,9 @@ class EbayDemoController extends Controller
         $condition           = Request('condition');
         $qty                 = Request('qty');
 
-        // Add item or update for sale
+        // Start the ebay helper class
         $ebayManager       = new EbayController();
+        // Request a new valid token to ebay api so we can use in the next request
         $ebayManager->getRefreshToken();
 
         // The product array we goin to send to ebay
@@ -69,13 +67,13 @@ class EbayDemoController extends Controller
                 'dimensions' => [
                     'height' => 5,
                     'length' => 10,
-                    'width' => 15,
-                    'unit' => 'INCH'
+                    'width'  => 15,
+                    'unit'   => 'INCH'
                 ],
                 'packageType' => 'LETTER',
                 'weight' => [
                     'value' => 2,
-                    'unit' => 'POUND'
+                    'unit'  => 'POUND'
                 ]
             ],
             'availability' => [

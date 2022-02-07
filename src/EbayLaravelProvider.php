@@ -35,8 +35,13 @@ class EbayLaravelProvider extends ServiceProvider
         // Load skeleton views
         $this->loadViewsFrom(__DIR__ . '/views', 'ebayLaravel');
 
-        // Load skeleton routes
+        // Ebay autentication routes
         $this->loadRoutesFrom(__DIR__ . '/Routes/web.php');
+
+        // Demo ebay test routes (Test Only)
+        if (config('ebayLaravel.demo_mode')) {
+            $this->loadRoutesFrom(__DIR__ . '/Routes/demo.php');
+        }
 
         // Load Migrations
         $this->loadMigrationsFrom(__DIR__ . '/Database/Migrations');

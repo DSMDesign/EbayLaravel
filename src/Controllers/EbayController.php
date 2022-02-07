@@ -86,7 +86,7 @@ class EbayController extends Controller
      * //* This Fuction will get the token from the storage file and return it the data
      * @return [type]
      */
-    public function readEbayToken()
+    private function readEbayToken()
     {
         // Just for reference
         //File::get(storage_path('app/' . $this->tokenTxtFile))
@@ -101,6 +101,16 @@ class EbayController extends Controller
                 'status' => false
             ];
         }
+    }
+
+    /**
+     * We goin to use this fuction so we can prevent other user to autenticate ebay
+     *
+     * @return [type]
+     */
+    public function applicationAuthenticated()
+    {
+        return $this->readEbayToken()['data'];
     }
 
     /**
@@ -192,7 +202,7 @@ class EbayController extends Controller
         // Sedn the request to the xero controller with aplication/json and send the invoice array
         $responseProductCreation = Http::acceptJson()
             ->withHeaders([
-                'Content-Language' => 'en-'.config('ebayLaravel.content_language'),
+                'Content-Language' => 'en-' . config('ebayLaravel.content_language'),
             ])
             ->withToken($this->bearerToken) // This is the token comes from the xero controller
             ->get($this->endPoint . 'sell/inventory/v1/inventory_item/' . $productSKu); // End point
