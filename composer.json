@@ -1,5 +1,5 @@
 {
-    "name": "mariojgt/ebay-laravel",
+    "name": "ebay/ebay-laravel",
     "description": "A Laravel Package EbayLaravel, a quick start for new laravel Packages",
     "keywords": [
         "laravel"
@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Mariojgt\\EbayLaravel\\": "src"
+            "EbayIntegration\\EbayLaravel\\": "src"
         }
     },
     "scripts": {
@@ -28,7 +28,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Mariojgt\\EbayLaravel\\EbayLaravelProvider"
+                "EbayIntegration\\EbayLaravel\\EbayLaravelProvider"
             ]
         }
     },

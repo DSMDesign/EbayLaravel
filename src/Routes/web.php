@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Mariojgt\EbayLaravel\Controllers\EbayAppAutenticateController;
+use EbayIntegration\EbayLaravel\Controllers\EbayAppAutenticateController;
 
 // Standard
 Route::group([

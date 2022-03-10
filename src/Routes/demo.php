@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Mariojgt\EbayLaravel\Controllers\EbayDemoController;
+use EbayIntegration\EbayLaravel\Controllers\EbayDemoController;
 
 // Standard
 Route::group([

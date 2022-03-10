@@ -1,6 +1,6 @@
 <?php
 
-namespace Mariojgt\EbayLaravel\Commands;
+namespace EbayIntegration\EbayLaravel\Commands;
 
 use Artisan;
 use Illuminate\Console\Command;
@@ -40,7 +40,7 @@ class Install extends Command
     {
         // Copy the need file to make the skeleton to work
         Artisan::call('vendor:publish', [
-            '--provider' => 'Mariojgt\EbayLaravel\SkeletonProvider',
+            '--provider' => 'EbayIntegration\EbayLaravel\SkeletonProvider',
             '--force'    => true,
         ]);
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Mariojgt\EbayLaravel\Listeners;
+namespace EbayIntegration\EbayLaravel\Listeners;
 
 use Illuminate\Support\Facades\Mail;
-use Mariojgt\EbayLaravel\Events\UserVerifyEvent;
-use Mariojgt\EbayLaravel\Mail\UserVerifyEmail;
+use EbayIntegration\EbayLaravel\Events\UserVerifyEvent;
+use EbayIntegration\EbayLaravel\Mail\UserVerifyEmail;
 
 class SendUserVerifyListener
 {

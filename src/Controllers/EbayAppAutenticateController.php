@@ -1,9 +1,9 @@
 <?php
 
-namespace Mariojgt\EbayLaravel\Controllers;
+namespace EbayIntegration\EbayLaravel\Controllers;
 
 use App\Http\Controllers\Controller;
-use Mariojgt\EbayLaravel\Controllers\EbayController;
+use EbayIntegration\EbayLaravel\Controllers\EbayController;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Http\Request;
 

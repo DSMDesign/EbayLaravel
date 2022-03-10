@@ -1,6 +1,6 @@
 <?php
 
-namespace Mariojgt\EbayLaravel\Mail;
+namespace EbayIntegration\EbayLaravel\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mariojgt\EbayLaravel\Commands;
+namespace EbayIntegration\EbayLaravel\Commands;
 
 use File;
 use Illuminate\Console\Command;

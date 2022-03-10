@@ -1,13 +1,13 @@
 <?php
 
-namespace Mariojgt\EbayLaravel\Models;
+namespace EbayIntegration\EbayLaravel\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Mariojgt\Castle\Trait\Castle;
+use EbayIntegration\Castle\Trait\Castle;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;

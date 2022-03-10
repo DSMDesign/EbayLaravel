@@ -1,13 +1,13 @@
 <?php
 
-namespace Mariojgt\EbayLaravel;
+namespace EbayIntegration\EbayLaravel;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Mariojgt\EbayLaravel\Commands\Install;
-use Mariojgt\EbayLaravel\Commands\Republish;
-use Mariojgt\EbayLaravel\Events\UserVerifyEvent;
-use Mariojgt\EbayLaravel\Listeners\SendUserVerifyListener;
+use EbayIntegration\EbayLaravel\Commands\Install;
+use EbayIntegration\EbayLaravel\Commands\Republish;
+use EbayIntegration\EbayLaravel\Events\UserVerifyEvent;
+use EbayIntegration\EbayLaravel\Listeners\SendUserVerifyListener;
 
 class EbayLaravelProvider extends ServiceProvider
 {

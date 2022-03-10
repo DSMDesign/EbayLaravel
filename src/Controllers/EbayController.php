@@ -1,6 +1,6 @@
 <?php
 
-namespace Mariojgt\EbayLaravel\Controllers;
+namespace EbayIntegration\EbayLaravel\Controllers;
 
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;

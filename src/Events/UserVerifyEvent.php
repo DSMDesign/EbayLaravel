@@ -1,6 +1,6 @@
 <?php
 
-namespace Mariojgt\EbayLaravel\Events;
+namespace EbayIntegration\EbayLaravel\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
